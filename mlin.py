@@ -17,8 +17,8 @@ class Mlin():
         self.canvas.bind("<Button-1>", self.klik)
         self.canvas.bind("<B1-Motion>", self.premik)
         self.canvas.bind("<ButtonRelease-1>", self.spusti)
-        self.canvas.bind("<B3-Motion>", self.vzeti)
-
+        self.canvas.bind("<Button-3>", self.vzeti)
+        
         
         self.koordinate = [[0,0,0],[0,3,0],[0,6,0],[1,1,0],[1,3,0],[1,5,0],[2,2,0],[2,3,0],[2,4,0],[3,0,0],[3,1,0],[3,2,0],
                            [3,4,0],[3,5,0],[3,6,0],[4,2,0],[4,3,0],[4,4,0],[5,1,0],[5,3,0],[5,5,0],[6,0,0],[6,3,0],[6,6,0]]
@@ -37,14 +37,14 @@ class Mlin():
         self.krog = None
         self.kdoJeNaPotezi = 1
 
-        self.seznamPravilnih = {((0,0),(0,3),(0,6)),((1,1),(1,3),(1,5)), ((2,2),(2,3),(2,4)), ((3,0),(3,1),(3,2)), ((3,4),(3,5),(3,6)),
-                                ((4,2),(4,3),(4,4)),((5,1),(5,3),(5,5)), ((6,0),(6,3),(6,6)), ((0,0),(3,0),(6,0)), ((1,1),(3,1),(5,1)),
-                                ((2,2),(3,2),(4,2)),((0,3),(1,3),(2,3)), ((4,3),(5,3),(6,3)), ((2,4),(3,4),(4,4)), ((5,1),(3,5),(5,5)),
-                                ((0,6),(3,6),(6,6)),((0,0),(1,1),(2,2)), ((6,0),(5,1),(4,2)), ((2,4),(1,5),(0,6)), ((4,4), (5,5),(6,6))}
+        self.seznamPravilnih = ({(0,0),(0,3),(0,6)},{(1,1),(1,3),(1,5)}, {(2,2),(2,3),(2,4)}, {(3,0),(3,1),(3,2)}, {(3,4),(3,5),(3,6)},
+                                {(4,2),(4,3),(4,4)},{(5,1),(5,3),(5,5)}, {(6,0),(6,3),(6,6)}, {(0,0),(3,0),(6,0)}, {(1,1),(3,1),(5,1)},
+                                {(2,2),(3,2),(4,2)},{(0,3),(1,3),(2,3)}, {(4,3),(5,3),(6,3)}, {(2,4),(3,4),(4,4)}, {(5,1),(3,5),(5,5)},
+                                {(0,6),(3,6),(6,6)},{(0,0),(1,1),(2,2)}, {(6,0),(5,1),(4,2)}, {(2,4),(1,5),(0,6)}, {(4,4),(5,5),(6,6)})
 
         self.vzame = 0
         
-    def klik(self, event):
+    def klik1(self, event):
         seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
         if len(seznam)==0:
             return
@@ -70,7 +70,9 @@ class Mlin():
             self.y = event.y
             
         
-    def spusti(self, event):
+    def spusti1(self, event):
+        self.m=0
+        self.r=0
         for n in range(0, len(self.koordinate)):
             sez = set()
             # print(self.krog, 100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
@@ -79,16 +81,16 @@ class Mlin():
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 1
                     self.krog = None
-                for i in self.koordinate:
-                    if i[2]==1:
-                        sez.add((i[0],i[1]))
-                for j in self.seznamPravilnih:
-                    if j in sez:
-                        self.vzame = 1
-                        sez = {}
-                self.vzame = 0
-                self.kdoJeNaPotezi = 2
-                    
+                    for i in self.koordinate:
+                        if i[2]==1:
+                            sez.add((i[0],i[1]))
+                            #print(sez, self.seznamPravilnih)
+                    for j in self.seznamPravilnih:
+                        if j.issubset(sez):
+                            self.vzame = 1
+                            return 
+                    self.kdoJeNaPotezi = 2
+                    self.r += 1
                     
                    
             elif self.kdoJeNaPotezi == 2:
@@ -96,34 +98,68 @@ class Mlin():
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 2
                     self.krog = None
-                for i in self.koordinate:
-                    if i[2]==2:
-                        sez.add((i[0],i[1]))
-                for j in self.seznamPravilnih:
-                    if j in sez:
-                        self.vzame = 2
-                        sez = {}
-                self.vzame = 0
-                self.kdoJeNaPotezi = 1
+                    for i in self.koordinate:
+                        if i[2]==2:
+                            sez.add((i[0],i[1]))
+                    for j in self.seznamPravilnih:
+                        if j.issubset(sez):
+                            self.vzame = 2
+                            return
+                    self.kdoJeNaPotezi = 1
+                    self.m += 1
+                        
+                
+                    
 
     def vzeti(self,event):
         seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
         if len(seznam)==0:
             return
         for krog in seznam:
-            if self.vzame == 2: 
+            if self.vzame == 2:
                 if krog in self.seznamRdeci and event.x > 75:
-                    self.x = event.x
-                    self.y = event.y
                     self.krog = krog
-            elif self.vzame == 1: 
+                    x,y,x1,y1 = self.canvas.coords(self.krog)
+                    i = (y-100)/50
+                    j = (x-100)/50
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==i and self.koordinate[k][1]==j:
+                            self.koordinate[k][2]=0
+                    self.canvas.delete(self.krog)
+                    self.vzame = 0
+                    self.kdoJeNaPotezi = 1
+            elif self.vzame == 1:
                 if krog in self.seznamModri and event.x < 425:
-                    self.x = event.x
-                    self.y = event.y
                     self.krog = krog
+                    x,y,x1,y1 = self.canvas.coords(self.krog)
+                    i = (y-100)/50
+                    j = (x-100)/50
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==i and self.koordinate[k][1]==j:
+                            self.koordinate[k][2]=0
+                    self.canvas.delete(self.krog)
+                    self.vzame = 0
+                    self.kdoJeNaPotezi = 2
                 
             
-            
+    def klik2(self,event):
+        seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
+        if len(seznam)==0:
+            return
+        if self.r == 9 and self.kdoJeNaPotezi == 1: 
+                for krog in seznam:
+                    if krog in self.seznamRdeci:
+                        self.x = event.x
+                        self.y = event.y
+                        self.krog = krog
+        elif self.m == 9 and self.kdoJeNaPotezi == 2:
+                for krog in seznam:
+                    if krog in self.seznamModri:
+                        self.x = event.x
+                        self.y = event.y
+                        self.krog = krog
+
+   
 
         
 
