@@ -97,9 +97,11 @@ class Mlin():
                     for j in self.seznamPravilnih:
                         if j.issubset(sez) and x.issubset(j):
                             self.vzame = 1
+                            self.r += 1
                             return 
                     self.kdoJeNaPotezi = 2
                     self.r += 1
+                    print(self.r)
                     
                    
             elif self.kdoJeNaPotezi == 2:
@@ -114,9 +116,11 @@ class Mlin():
                     for j in self.seznamPravilnih:
                         if j.issubset(sez) and x.issubset(j):
                             self.vzame = 2
+                            self.m += 1
                             return
                     self.kdoJeNaPotezi = 1
                     self.m += 1
+                    print(self.m)
                         
                 
                     
@@ -137,6 +141,7 @@ class Mlin():
                             self.koordinate[k][2]=0
                     self.canvas.delete(self.krog)
                     self.brisiR += 1
+                    print(self.brisiR)
                     self.vzame = 0
                     self.kdoJeNaPotezi = 1
             elif self.vzame == 1:
@@ -150,6 +155,7 @@ class Mlin():
                             self.koordinate[k][2]=0
                     self.canvas.delete(self.krog)
                     self.brisiM +=1
+                    print(self.brisiM)
                     self.vzame = 0
                     self.kdoJeNaPotezi = 2
                 
@@ -164,45 +170,55 @@ class Mlin():
                     if krog in self.seznamRdeci:
                         self.x = event.x
                         self.y = event.y
+                        self.i = (self.y-100)//50
+                        self.j = (self.x-100)//50
                         self.krog = krog
         elif self.m == 9 and self.kdoJeNaPotezi == 2:
                 for krog in seznam:
                     if krog in self.seznamModri:
                         self.x = event.x
                         self.y = event.y
+                        self.i = (self.y-100)//50
+                        self.j = (self.x-100)//50
                         self.krog = krog
 
     def spusti2(self, event):
-        
+        print("spusti2")
         for n in range(0, len(self.koordinate)):
             sez = set()
             if self.kdoJeNaPotezi == 1:
-                if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0:
+                if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0 and self.sosednji(event):
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 1
-                    x = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    A = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==self.i and self.koordinate[k][1]==self.j:
+                            self.koordinate[k][2]=0
                     self.krog = None
                     for i in self.koordinate:
                         if i[2]==1:
                             sez.add((i[0],i[1]))
                     for j in self.seznamPravilnih:
-                        if j.issubset(sez) and x.issubset(j):
+                        if j.issubset(sez) and A.issubset(j):
                             self.vzame = 1
                             return 
                     self.kdoJeNaPotezi = 2
                     
                    
             elif self.kdoJeNaPotezi == 2:
-                if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0:
+                if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0 and self.sosednji(event):
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 2
-                    x = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    A = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==self.i and self.koordinate[k][1]==self.j:
+                            self.koordinate[k][2]=0
                     self.krog = None
                     for i in self.koordinate:
                         if i[2]==2:
                             sez.add((i[0],i[1]))
                     for j in self.seznamPravilnih:
-                        if j.issubset(sez) and x.issubset(j):
+                        if j.issubset(sez) and A.issubset(j):
                             self.vzame = 2
                             return
                     self.kdoJeNaPotezi = 1
@@ -216,12 +232,16 @@ class Mlin():
                     if krog in self.seznamRdeci:
                         self.x = event.x
                         self.y = event.y
+                        self.i = (self.y-100)//50
+                        self.j = (self.x-100)//50
                         self.krog = krog
         elif self.brisiR == 6 and self.kdoJeNaPotezi == 2:
                 for krog in seznam:
                     if krog in self.seznamModri:
                         self.x = event.x
                         self.y = event.y
+                        self.i = (self.y-100)//50
+                        self.j = (self.x-100)//50
                         self.krog = krog
 
     def spusti3(self, event):
@@ -231,13 +251,16 @@ class Mlin():
                 if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0:
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 1
-                    x = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    A = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==self.i and self.koordinate[k][1]==self.j:
+                            self.koordinate[k][2]=0
                     self.krog = None
                     for i in self.koordinate:
                         if i[2]==1:
                             sez.add((i[0],i[1]))
                     for j in self.seznamPravilnih:
-                        if j.issubset(sez) and x.issubset(j):
+                        if j.issubset(sez) and A.issubset(j):
                             self.vzame = 1
                             return 
                     self.kdoJeNaPotezi = 2
@@ -247,13 +270,16 @@ class Mlin():
                 if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0:
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 2
-                    x = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    A = {(self.koordinate[n][0], self.koordinate[n][1])}
+                    for k in range(0,len(self.koordinate)):
+                        if self.koordinate[k][0]==self.i and self.koordinate[k][1]==self.j:
+                            self.koordinate[k][2]=0
                     self.krog = None
                     for i in self.koordinate:
                         if i[2]==2:
                             sez.add((i[0],i[1]))
                     for j in self.seznamPravilnih:
-                        if j.issubset(sez) and x.issubset(j):
+                        if j.issubset(sez) and A.issubset(j):
                             self.vzame = 2
                             return
                     self.kdoJeNaPotezi = 1
@@ -267,7 +293,7 @@ class Mlin():
             self.klik3(event)
 
     def spusti(self,event):
-        print(self.r, self.m)
+        #print(self.r, self.m)
         if self.kdoJeNaPotezi != 0 and (self.r != 9 or self.m != 9) and self.brisiM != 6 and self.brisiR != 6:
             self.spusti1(event)
         elif self.kdoJeNaPotezi != 0 and self.r == 9 and self.m == 9 and self.brisiM < 6 and self.brisiR < 6:
@@ -276,19 +302,10 @@ class Mlin():
             self.spusti3(event)
     
     def sosednji(self,event):
-        seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
-        if len(seznam)==0:
-            return
-        for krog in seznam:
-            self.krog = krog
-            x,y,x1,y1 = self.canvas.coords(self.krog)
-            i = (y-100)/50
-            j = (x-100)/50
-        a,b,c,d = self.canvas.coords(self.spusti(self.krog))
-        i1 = (b-100)/50
-        j1 = (a-100)/50
+        i1 = (event.y-100)//50
+        j1 = (event.x-100)//50
         for k in self.seznamPravilnih1:
-            if [(i,j),(i1,j1)]==[k[1],k[2]] or [(i,j),(i1,j1)]==[k[2],k[3]] or [(i1,j1),(i,j)]==[k[1],k[2]] or [(i1,j1),(i,j)]==[k[2],k[3]]:
+            if [(self.i,self.j),(i1,j1)]==[k[0],k[1]] or [(self.i,self.j),(i1,j1)]==[k[1],k[2]] or [(i1,j1),(self.i,self.j)]==[k[0],k[1]] or [(i1,j1),(self.i,self.j)]==[k[1],k[2]]:
                 return True
         return False
 
