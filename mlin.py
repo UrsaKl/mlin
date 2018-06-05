@@ -1,23 +1,26 @@
-from tkinter import *
+from Tkinter import *
+from Tkinter import Font
 
 class Mlin():
     def __init__(self, master):
         self.canvas = Canvas(master, width=525, height=525, background='beige')
         self.canvas.pack()
         self.polmer = 10
-        self.canvas.create_rectangle(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
-        self.canvas.create_rectangle(150 +self.polmer, 150 + self.polmer, 350 + self.polmer, 350 + self.polmer)
-        self.canvas.create_line(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
-        self.canvas.create_line(250 + self.polmer, 100 + self.polmer, 250 + self.polmer, 400 + self.polmer)
-        self.canvas.create_line(100 + self.polmer, 250 + self.polmer, 400 + self.polmer, 250 + self.polmer)
-        self.canvas.create_line(400 + self.polmer, 100 + self.polmer, 100 + self.polmer, 400 + self.polmer)
-        self.canvas.create_rectangle(200 + self.polmer, 200 + self.polmer, 300 + self.polmer, 300 + self.polmer, fill='beige')
+        self.stirikotnik = self.canvas.create_rectangle(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
+        self.stirikotnik1 = self.canvas.create_rectangle(150 +self.polmer, 150 + self.polmer, 350 + self.polmer, 350 + self.polmer)
+        self.crta = self.canvas.create_line(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
+        self.crta1 = self.canvas.create_line(250 + self.polmer, 100 + self.polmer, 250 + self.polmer, 400 + self.polmer)
+        self.crta2 = self.canvas.create_line(100 + self.polmer, 250 + self.polmer, 400 + self.polmer, 250 + self.polmer)
+        self.crta3 = self.canvas.create_line(400 + self.polmer, 100 + self.polmer, 100 + self.polmer, 400 + self.polmer)
+        self.strikotnik2 = self.canvas.create_rectangle(200 + self.polmer, 200 + self.polmer, 300 + self.polmer, 300 + self.polmer, fill='beige')
    
-        
+        self.canvas.focus_set()
         self.canvas.bind("<Button-1>", self.klik)
         self.canvas.bind("<B1-Motion>", self.premik)
         self.canvas.bind("<ButtonRelease-1>", self.spusti)
         self.canvas.bind("<Button-3>", self.vzeti)
+        self.canvas.bind("<Key>", self.novaIgra)
+
         
         
         self.koordinate = [[0,0,0],[0,3,0],[0,6,0],[1,1,0],[1,3,0],[1,5,0],[2,2,0],[2,3,0],[2,4,0],[3,0,0],[3,1,0],[3,2,0],
@@ -53,6 +56,12 @@ class Mlin():
         self.r=0
         self.brisiM=0
         self.brisiR=0
+
+        self.zmaga = ""
+        if self.zmaga != "":
+            zmagovalec(self)
+
+        
         
     def klik1(self, event):
         seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
@@ -143,6 +152,9 @@ class Mlin():
                     self.brisiR += 1
                     print(self.brisiR)
                     self.vzame = 0
+                    if self.brisiR == 7:
+                        self.zmaga = "modri"
+                        self.zmagovalec()
                     self.kdoJeNaPotezi = 1
             elif self.vzame == 1:
                 if krog in self.seznamModri and event.x < 425:
@@ -157,11 +169,13 @@ class Mlin():
                     self.brisiM +=1
                     print(self.brisiM)
                     self.vzame = 0
+                    if self.brisiM == 7:
+                        self.zmaga = "rdeči"
+                        self.zmagovalec()
                     self.kdoJeNaPotezi = 2
                 
             
     def klik2(self,event):
-        print(self.r, self.m)
         seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
         if len(seznam)==0:
             return
@@ -183,11 +197,11 @@ class Mlin():
                         self.krog = krog
 
     def spusti2(self, event):
-        print("spusti2")
         for n in range(0, len(self.koordinate)):
             sez = set()
             if self.kdoJeNaPotezi == 1:
                 if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0 and self.sosednji(event):
+                    print(self.sosednji)
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 1
                     A = {(self.koordinate[n][0], self.koordinate[n][1])}
@@ -203,10 +217,10 @@ class Mlin():
                             self.vzame = 1
                             return 
                     self.kdoJeNaPotezi = 2
-                    
                    
             elif self.kdoJeNaPotezi == 2:
                 if abs(100 + 50*self.koordinate[n][1] - event.x) <= 2*self.polmer  and abs(100 + 50*self.koordinate[n][0] - event.y) <= 2*self.polmer and self.koordinate[n][2] == 0 and self.sosednji(event):
+                    print(self.sosednji)
                     self.canvas.coords(self.krog,100+50*self.koordinate[n][1],100+50*self.koordinate[n][0],100+50*self.koordinate[n][1]+2*self.polmer,100+50*self.koordinate[n][0]+2*self.polmer)
                     self.koordinate[n][2] = 2
                     A = {(self.koordinate[n][0], self.koordinate[n][1])}
@@ -227,7 +241,7 @@ class Mlin():
         seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
         if len(seznam)==0:
             return
-        if self.brisiM == 6 and self.kdoJeNaPotezi == 1: 
+        if self.brisiR == 6 and self.kdoJeNaPotezi == 1: 
                 for krog in seznam:
                     if krog in self.seznamRdeci:
                         self.x = event.x
@@ -235,7 +249,7 @@ class Mlin():
                         self.i = (self.y-100)//50
                         self.j = (self.x-100)//50
                         self.krog = krog
-        elif self.brisiR == 6 and self.kdoJeNaPotezi == 2:
+        elif self.brisiM == 6 and self.kdoJeNaPotezi == 2:
                 for krog in seznam:
                     if krog in self.seznamModri:
                         self.x = event.x
@@ -289,31 +303,97 @@ class Mlin():
             self.klik1(event)
         elif self.kdoJeNaPotezi != 0 and self.r == 9 and self.m == 9 and self.brisiM < 6 and self.brisiR < 6:
             self.klik2(event)
-        elif self.kdoJeNaPotezi != 0 and (self.brisiM == 6 or self.brisiR == 6):
+        elif self.kdoJeNaPotezi == 1 and self.brisiR < 6:
+            self.klik2(event)
+        elif self.kdoJeNaPotezi == 1 and self.brisiR == 6:
+            self.klik3(event)
+        elif self.kdoJeNaPotezi == 2 and self.brisiM < 6:
+            self.klik2(event)
+        elif self.kdoJeNaPotezi == 2 and self.brisiM == 6:
             self.klik3(event)
 
     def spusti(self,event):
-        #print(self.r, self.m)
         if self.kdoJeNaPotezi != 0 and (self.r != 9 or self.m != 9) and self.brisiM != 6 and self.brisiR != 6:
             self.spusti1(event)
         elif self.kdoJeNaPotezi != 0 and self.r == 9 and self.m == 9 and self.brisiM < 6 and self.brisiR < 6:
             self.spusti2(event)
-        elif self.kdoJeNaPotezi != 0 and (self.brisiM == 6 or self.brisiR == 6):
+        elif self.kdoJeNaPotezi == 1 and self.brisiR < 6:
+            self.spusti2(event)
+        elif self.kdoJeNaPotezi == 1 and self.brisiR == 6:
             self.spusti3(event)
+        elif self.kdoJeNaPotezi == 2 and self.brisiM < 6:
+            self.spusti2(event)
+        elif self.kdoJeNaPotezi == 2 and self.brisiM == 6:
+            self.spusti3(event)
+
     
     def sosednji(self,event):
+        print(self.i,self.j)
         i1 = (event.y-100)//50
         j1 = (event.x-100)//50
+        print(i1,j1)
         for k in self.seznamPravilnih1:
             if [(self.i,self.j),(i1,j1)]==[k[0],k[1]] or [(self.i,self.j),(i1,j1)]==[k[1],k[2]] or [(i1,j1),(self.i,self.j)]==[k[0],k[1]] or [(i1,j1),(self.i,self.j)]==[k[1],k[2]]:
                 return True
         return False
+        
+
+    def zmagovalec(self):
+        vel= font.Font(family='Helvetica', size=10, weight='bold')
+        besedilo = "KONEC IGRE! Zmagal je " + self.zmaga + " igralec!\nZa novo igro pritisni katero koli tipko!" 
+        self.napis = self.canvas.create_text((265, 250), text = besedilo, fill='black', font=vel)
+        ## self.canvas.bind("<Key>", self.novaIgra)
+
+    def novaIgra(self, event):
+        ## odstranimo krogce + besedilo + ponast. sezname
+        self.canvas.delete(self.napis, self.koordinate, self.m, self.r, self.vzame, self.kdoJeNaPotezi, self.brisiR, self.brisiM, self.zmaga)
+        for krog in self.seznamRdeci:
+            self.canvas.delete(krog)
+        for krog in self.seznamModri:
+            self.canvas.delete(krog)
+
+        self.stirikotnik = self.canvas.create_rectangle(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
+        self.stirikotnik1 = self.canvas.create_rectangle(150 +self.polmer, 150 + self.polmer, 350 + self.polmer, 350 + self.polmer)
+        self.crta = self.canvas.create_line(100 + self.polmer, 100 + self.polmer, 400 + self.polmer, 400 + self.polmer)
+        self.crta1 = self.canvas.create_line(250 + self.polmer, 100 + self.polmer, 250 + self.polmer, 400 + self.polmer)
+        self.crta2 = self.canvas.create_line(100 + self.polmer, 250 + self.polmer, 400 + self.polmer, 250 + self.polmer)
+        self.crta3 = self.canvas.create_line(400 + self.polmer, 100 + self.polmer, 100 + self.polmer, 400 + self.polmer)
+        self.strikotnik2 = self.canvas.create_rectangle(200 + self.polmer, 200 + self.polmer, 300 + self.polmer, 300 + self.polmer, fill='beige')
+
+        self.koordinate = [[0,0,0],[0,3,0],[0,6,0],[1,1,0],[1,3,0],[1,5,0],[2,2,0],[2,3,0],[2,4,0],[3,0,0],[3,1,0],[3,2,0],
+                           [3,4,0],[3,5,0],[3,6,0],[4,2,0],[4,3,0],[4,4,0],[5,1,0],[5,3,0],[5,5,0],[6,0,0],[6,3,0],[6,6,0]]
 
 
+        for i,j,k in self.koordinate:
+            x = 100 + 50*j
+            y = 100 + 50*i
+            self.canvas.create_oval(x, y, x + 2*self.polmer, y + 2*self.polmer, fill='white')
 
-            
+        self.seznamRdeci = []
+        self.seznamModri = []
+        for i in range(1, 10):
+            self.seznamRdeci.append(self.canvas.create_oval(50, 100 + 30*i, 50 + 2*self.polmer, 100 + 30*i + 2*self.polmer, fill='red'))
+            self.seznamModri.append(self.canvas.create_oval(450, 100 + 30*i, 450 + 2*self.polmer, 100 + 30*i + 2*self.polmer, fill='blue'))
+        
+        self.krog = None
+        self.kdoJeNaPotezi = 1
 
+        self.vzame = 0
+
+        self.m=0
+        self.r=0
+        self.brisiM=0
+        self.brisiR=0
+
+        self.zmaga = ""
+        if self.zmaga != "":
+            zmagovalec(self)
+        
 
 root = Tk()
 aplikacija = Mlin(root)
 root.mainloop()
+
+
+
+          
