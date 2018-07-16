@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.List;
+import java.awt.MouseInfo;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -26,8 +27,10 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 	 int m;
 	 int brisiM;
 	 int brisiR;
-	 int vzame;
+	 boolean vzame;
 	 LinkedList <Set<int[]>>  seznamPravilnih;
+	 Krogec zacetnoPolje;
+	 int [][][] pravilni;
 	 
 	 
 
@@ -36,7 +39,7 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 		koordinate = new int [][] {{0,0,0},{0,3,0},{0,6,0},{1,1,0},{1,3,0},{1,5,0},{2,2,0},{2,3,0},{2,4,0},{3,0,0},{3,1,0},{3,2,0},
                  {3,4,0},{3,5,0},{3,6,0},{4,2,0},{4,3,0},{4,4,0},{5,1,0},{5,3,0},{5,5,0},{6,0,0},{6,3,0},{6,6,0}};
         seznamPravilnih = new LinkedList<Set<int[]>> ();
-        int[][][] pravilni = {{{0,0},{0,3},{0,6}},{{1,1},{1,3},{1,5}}, {{2,2},{2,3},{2,4}}, {{3,0},{3,1},{3,2}}, {{3,4},{3,5},{3,6}},
+        pravilni = new int [][][] {{{0,0},{0,3},{0,6}},{{1,1},{1,3},{1,5}}, {{2,2},{2,3},{2,4}}, {{3,0},{3,1},{3,2}}, {{3,4},{3,5},{3,6}},
                 {{4,2},{4,3},{4,4}},{{5,1},{5,3},{5,5}}, {{6,0},{6,3},{6,6}}, {{0,0},{3,0},{6,0}}, {{1,1},{3,1},{5,1}},
                 {{2,2},{3,2},{4,2}},{{0,3},{1,3},{2,3}}, {{4,3},{5,3},{6,3}}, {{2,4},{3,4},{4,4}}, {{1,5},{3,5},{5,5}},
                 {{0,6},{3,6},{6,6}},{{0,0},{1,1},{2,2}}, {{6,0},{5,1},{4,2}}, {{2,4},{1,5},{0,6}}, {{4,4},{5,5},{6,6}}};
@@ -67,7 +70,8 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 		m = 0;
 		brisiM = 0;
 		brisiR = 0;
-		vzame = 0;
+		vzame = false;
+		zacetnoPolje = null;
 		
 	}
 	
@@ -100,7 +104,23 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 			 if(seznamRdeci[i] != null) seznamRdeci[i].narisi(g);
 			 if(seznamModri[i] != null) seznamModri[i].narisi(g);
 		 }
-		 
+		 if (brisiM > 6 || brisiR > 6) {
+			 g.drawString("Igre je konec!!!!", 100, 50);
+		 }
+		 else {
+			 g.drawString("Na potezi: ", 100, 50);
+			 g.setColor(kdoJeNaPotezi == 1 ? Color.RED : Color.BLUE);
+			 g.fillOval(150, 40, 20, 20);
+			 g.setColor(Color.BLACK);
+			 g.drawOval(150, 40, 20, 20);
+			 if (vzame) {
+				 g.drawString("Zbriši: ", 200, 50);
+				 g.setColor(kdoJeNaPotezi == 1 ? Color.BLUE : Color.RED);
+				 g.fillOval(250, 40, 20, 20);
+				 g.setColor(Color.BLACK);
+				 g.drawOval(250, 40, 20, 20);
+			 }
+		 }
 		
 		 
 		
@@ -115,8 +135,9 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 		Krogec[] seznam = (kdoJeNaPotezi == 1) ? seznamRdeci : seznamModri;
 		for(int i = 0; i< 9; i++){
 			Krogec krogec = seznam[i];
+			if (krogec == null) continue;
 			double r = Math.sqrt(Math.pow(x-krogec.x,2) + Math.pow(y - krogec.y, 2));
-			if(((r < 10) && (kdoJeNaPotezi == 1) && (krogec.x < 75)) || ((r < 10) && (kdoJeNaPotezi == 2) && (krogec.x > 425))){
+			if(((r < 20) && (kdoJeNaPotezi == 1) && (krogec.x < 75)) || ((r < 10) && (kdoJeNaPotezi == 2) && (krogec.x > 425))){
 				premik = krogec;
 				premikX = x;
 				premikY = y;
@@ -125,6 +146,20 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 				break;
 			}
 		}
+	}
+	
+	public boolean vsebuje(Set <int[]> mnozica, int[] element) {
+		for (int[] e: mnozica) {
+			if (e[0] == element[0] && e[1] == element[1]) return true;
+		}
+		return false;
+	}
+	
+	public boolean vsebujeVse(Set <int[]> mnozica1, Set <int[]> mnozica2) {
+		for (int[] e: mnozica2) {
+			if (!vsebuje(mnozica1, e)) return false;
+		}
+		return true;
 	}
 	
 	public void spusti1(MouseEvent e){
@@ -145,12 +180,106 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 					Set<int[]> notri = new HashSet<int[]> (); 
 					for (int k = 0; k < 24; k++){
 						if (koordinate[k][2] == kdoJeNaPotezi) {
-							notri.add(new int[] {koordinate[k][0], koordinate[k][1]});
+							notri.add(new int[] {koordinate[k][1], koordinate[k][0]});
+						}		
+					}
+					System.out.println(notri);
+					for (Set <int[]> trojka: seznamPravilnih) {
+						if (!vsebuje(trojka, new int[] {(krogec.x - 110)/50, (krogec.y - 110)/50})) continue;
+						if (vsebujeVse(notri, trojka)) {
+							vzame = true;
+							return; // spremeni igralca pri vzeti
+						}
+					}
+					System.out.println(vzame);
+					kdoJeNaPotezi = 3 - kdoJeNaPotezi;
+					return;
+				}
+			
+			}
+			premik.x = zacetniX; // premakne nazaj na zaèetek, èe je polje zasedeno
+			premik.y = zacetniY;
+			premik = null;
+			repaint();
+		}
+	
+	}
+	
+	public void klik2(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		Krogec[] seznam = (kdoJeNaPotezi == 1) ? seznamRdeci : seznamModri;
+		for(int i = 0; i< 9; i++){
+			Krogec krogec = seznam[i];
+			if (krogec == null) continue;
+			double r = Math.sqrt(Math.pow(x-krogec.x,2) + Math.pow(y - krogec.y, 2));
+			if(r < 20){
+				zacetnoPolje = null;
+				for (int j = 0; j < 24; j++){
+					if (krogec.x == seznamBeli[j].x && krogec.y == seznamBeli[j].y) {
+						zacetnoPolje = seznamBeli[j];
+						break;
+					}
+				}
+				premik = krogec;
+				premikX = x;
+				premikY = y;
+				zacetniX = krogec.x;
+				zacetniY = krogec.y;
+				break;
+			}
+		}
+	}
+	
+	
+	public boolean sosednji(Krogec k1, Krogec k2){
+		System.out.println(k1.x + " " +  k1.y + " " + k2.x + " " + k2.y);
+		for (int [][] trojka: pravilni){
+			int p1x = 110 + 50*trojka[0][0];
+			int p2x = 110 + 50*trojka[1][0];
+			int p3x = 110 + 50*trojka[2][0];
+			int p1y = 110 + 50*trojka[0][1];
+			int p2y = 110 + 50*trojka[1][1];
+			int p3y = 110 + 50*trojka[2][1];
+			if (k1.x == p1x && k1.y == p1y && k2.x == p2x && k2.y == p2y) return true;
+			if (k1.x == p2x && k1.y == p2y && k2.x == p1x && k2.y == p1y) return true;
+			if (k1.x == p2x && k1.y == p2y && k2.x == p3x && k2.y == p3y) return true;
+			if (k1.x == p3x && k1.y == p3y && k2.x == p2x && k2.y == p2y) return true;
+		}
+		return false;
+	}
+	
+	public void spusti2(MouseEvent e){
+		int x = e.getX();
+		int y = e.getY();
+		if(premik != null){
+			for (int i = 0; i < 24; i++){
+				Krogec krogec = seznamBeli[i];
+				double raz = Math.sqrt(Math.pow(x - krogec.x , 2) + Math.pow(y - krogec.y, 2));
+				if((raz < 20) && (koordinate[i][2] == 0) && sosednji(krogec, zacetnoPolje)){
+					premik.x = krogec.x;
+					premik.y = krogec.y;
+					premik = null;
+					koordinate[i][2] = kdoJeNaPotezi;
+					for (int j = 0; j < 24; j ++) {
+						if (zacetnoPolje.x == seznamBeli[j].x && zacetnoPolje.y == seznamBeli[j].y) {
+							koordinate[j][2] = 0;
+							break;
+						}
+					}
+					repaint();
+					if (kdoJeNaPotezi == 1)  {r = r + 1;}
+					else {m = m+ 1;}
+					Set<int[]> notri = new HashSet<int[]> (); 
+					for (int k = 0; k < 24; k++){
+						if (koordinate[k][2] == kdoJeNaPotezi) {
+							notri.add(new int[] {koordinate[k][1], koordinate[k][0]});
 						}		
 					}
 					for (Set <int[]> trojka: seznamPravilnih) {
-						if (notri.containsAll(trojka)) {
-							vzame = kdoJeNaPotezi;
+						if (!vsebuje(trojka, new int[] {(krogec.x - 110)/50, (krogec.y - 110)/50})) continue;
+						if (vsebujeVse(notri, trojka))  {
+							vzame = true;
 							return; // spremeni igralca pri vzeti
 						}
 					}
@@ -159,7 +288,7 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 				}
 			
 			}
-			premik.x = zacetniX;
+			premik.x = zacetniX; // premakne nazaj na zaèetek, èe je polje zasedeno
 			premik.y = zacetniY;
 			premik = null;
 			repaint();
@@ -167,7 +296,82 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 	
 	}
 	
+	public void spusti3(MouseEvent e){
+		int x = e.getX();
+		int y = e.getY();
+		if(premik != null){
+			for (int i = 0; i < 24; i++){
+				Krogec krogec = seznamBeli[i];
+				double raz = Math.sqrt(Math.pow(x - krogec.x , 2) + Math.pow(y - krogec.y, 2));
+				if((raz < 20) && (koordinate[i][2] == 0)){
+					premik.x = krogec.x;
+					premik.y = krogec.y;
+					premik = null;
+					koordinate[i][2] = kdoJeNaPotezi;
+					for (int j = 0; j < 24; j ++) {
+						if (zacetnoPolje.x == seznamBeli[j].x && zacetnoPolje.y == seznamBeli[j].y) {
+							koordinate[j][2] = 0;
+							break;
+						}
+					}
+					repaint();
+					if (kdoJeNaPotezi == 1)  {r = r + 1;}
+					else {m = m+ 1;}
+					Set<int[]> notri = new HashSet<int[]> (); 
+					for (int k = 0; k < 24; k++){
+						if (koordinate[k][2] == kdoJeNaPotezi) {
+							notri.add(new int[] {koordinate[k][1], koordinate[k][0]});
+						}		
+					}
+					for (Set <int[]> trojka: seznamPravilnih) {
+						if (!vsebuje(trojka, new int[] {(krogec.x - 110)/50, (krogec.y - 110)/50})) continue;
+						if (vsebujeVse(notri, trojka))  {
+							vzame = true;
+							return; // spremeni igralca pri vzeti
+						}
+					}
+					kdoJeNaPotezi = 3 - kdoJeNaPotezi;
+					return;
+				}
+			
+			}
+			premik.x = zacetniX; // premakne nazaj na zaèetek, èe je polje zasedeno
+			premik.y = zacetniY;
+			premik = null;
+			repaint();
+		}
 	
+	}
+	
+	public void brisi(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		Krogec[] seznam = (kdoJeNaPotezi == 1) ? seznamModri : seznamRdeci;
+		for(int i = 0; i< 9; i++){
+			Krogec krogec = seznam[i];
+			if (krogec == null) continue;
+			double r = Math.sqrt(Math.pow(x-krogec.x,2) + Math.pow(y - krogec.y, 2));
+			if(r < 20 && krogec.x > 75 && krogec.x < 425) {
+				for (int j = 0; j < 24; j++){
+					if (krogec.x == seznamBeli[j].x && krogec.y == seznamBeli[j].y) {
+						koordinate[j][2] = 0;
+						break;
+					}
+				}
+				seznam[i] = null;
+				vzame = false;
+				repaint();
+				kdoJeNaPotezi = 3 - kdoJeNaPotezi;
+				if (kdoJeNaPotezi == 1) {
+					brisiR += 1;
+				}
+				else {
+					brisiM += 1;
+				}
+				break;
+			}
+		}
+	}
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
@@ -211,13 +415,23 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		klik1(e);
+		if (brisiM > 6 || brisiR > 6) return;
+		if (e.getButton() == MouseEvent.BUTTON3 && vzame) brisi(e);
+		else if (e.getButton() == MouseEvent.BUTTON1) {
+			if (m < 9) klik1(e);
+			else klik2(e);
+		}
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		spusti1(e);
+		if (brisiM > 6 || brisiR > 6) return;
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			if (m < 9) spusti1(e);
+			else if (kdoJeNaPotezi == 1 && brisiR < 6 || kdoJeNaPotezi == 2 && brisiM < 6) spusti2(e);
+			else spusti3(e);
+		}
 	}
 
 	
