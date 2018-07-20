@@ -110,15 +110,15 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 		 else {
 			 g.drawString("Na potezi: ", 100, 50);
 			 g.setColor(kdoJeNaPotezi == 1 ? Color.RED : Color.BLUE);
-			 g.fillOval(150, 40, 20, 20);
+			 g.fillOval(160, 35, 20, 20);
 			 g.setColor(Color.BLACK);
-			 g.drawOval(150, 40, 20, 20);
+			 g.drawOval(160, 35, 20, 20);
 			 if (vzame) {
 				 g.drawString("Zbriši: ", 200, 50);
 				 g.setColor(kdoJeNaPotezi == 1 ? Color.BLUE : Color.RED);
-				 g.fillOval(250, 40, 20, 20);
+				 g.fillOval(240, 35, 20, 20);
 				 g.setColor(Color.BLACK);
-				 g.drawOval(250, 40, 20, 20);
+				 g.drawOval(240, 35, 20, 20);
 			 }
 		 }
 		
@@ -183,7 +183,6 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 							notri.add(new int[] {koordinate[k][1], koordinate[k][0]});
 						}		
 					}
-					System.out.println(notri);
 					for (Set <int[]> trojka: seznamPravilnih) {
 						if (!vsebuje(trojka, new int[] {(krogec.x - 110)/50, (krogec.y - 110)/50})) continue;
 						if (vsebujeVse(notri, trojka)) {
@@ -191,7 +190,6 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 							return; // spremeni igralca pri vzeti
 						}
 					}
-					System.out.println(vzame);
 					kdoJeNaPotezi = 3 - kdoJeNaPotezi;
 					return;
 				}
@@ -233,7 +231,6 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 	
 	
 	public boolean sosednji(Krogec k1, Krogec k2){
-		System.out.println(k1.x + " " +  k1.y + " " + k2.x + " " + k2.y);
 		for (int [][] trojka: pravilni){
 			int p1x = 110 + 50*trojka[0][0];
 			int p2x = 110 + 50*trojka[1][0];
@@ -439,26 +436,3 @@ public class MlinPlatno extends JPanel implements MouseListener,MouseMotionListe
 }
 
 
-/* 
-self.seznamRdeci = []
-self.seznamModri = []
-for i in range(1, 10):
-self.seznamRdeci.append(self.canvas.create_oval(50, 100 + 30*i, 50 + 2*self.polmer, 100 + 30*i + 2*self.polmer, fill='red'))
-self.seznamModri.append(self.canvas.create_oval(450, 100 + 30*i, 450 + 2*self.polmer, 100 + 30*i + 2*self.polmer, fill='blue'))
-
-def klik1(self, event):
-        seznam = self.canvas.find_overlapping(event.x, event.y, event.x+1, event.y+1)
-        if len(seznam)==0:
-            return
-        for krog in seznam:
-            if self.kdoJeNaPotezi == 1: 
-                if krog in self.seznamRdeci and event.x < 75:
-                    self.x = event.x
-                    self.y = event.y
-                    self.krog = krog
-            elif self.kdoJeNaPotezi == 2: 
-                if krog in self.seznamModri and event.x > 425:
-                    self.x = event.x
-                    self.y = event.y
-					self.krog = krog
-*/
